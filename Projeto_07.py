@@ -4,12 +4,19 @@
 
 import os
 import pandas as pd
+import warnings
+
+# limpa o terminal na hora que o play e clicado para sumir com os avisos do windows
+os.system('cls' if os.name == 'nt' else 'clear')
+
+# bloqueia avisos de atualizacoes do pandas
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 arquivo = 'varejo.csv'
 pasta_local = os.path.dirname(os.path.abspath(__file__))
 caminho_csv = os.path.join(pasta_local, arquivo)
 
-# abrindo o csv com ponto e virgula pra nao juntar as colunas
+# abrindo o csv com ponto e virgula
 df = pd.read_csv(caminho_csv, sep=';')
 
 # --- comeco da limpeza da base ---
@@ -38,7 +45,10 @@ print("--- METRICAS DA COLUNA FILHOS ---")
 linhas_limpas = df['CL_FHL'].count()
 media_f = df['CL_FHL'].mean()
 mediana_f = df['CL_FHL'].median()
-moda_f = int(df['CL_FHL'].mode())
+
+# leitura limpa da moda
+moda_f = int(df['CL_FHL'].mode().iloc[0])
+
 minimo_f = df['CL_FHL'].min()
 maximo_f = df['CL_FHL'].max()
 desvio_padrao_f = df['CL_FHL'].std()
@@ -70,6 +80,4 @@ for categoria, tot_vendas in tot_categoria.items():
 
 # --- exportando a amostra do df_limpo exigido na sprint 6 ---
 caminho_saida = os.path.join(pasta_local, 'varejo_limpo.csv')
-# head(100) deixa o arquivo leve para o site do github aceitar pelo navegador
 df.head(100).to_csv(caminho_saida, sep=';', index=False)
-print("\n✅ Amostra da base limpa criada com sucesso: varejo_limpo.csv")
