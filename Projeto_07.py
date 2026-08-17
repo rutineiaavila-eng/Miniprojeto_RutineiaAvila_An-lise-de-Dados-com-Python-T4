@@ -1,5 +1,5 @@
 # Projeto de Analise de Dados - Modulo 1 / Semana 7
-# Aluno: [Seu Nome Completo]
+# Aluno: [Rutineia Cordeiro de Avila]
 # Turma: Analise_de_Dados_T1
 import os
 import pandas as pd
