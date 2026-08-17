@@ -1,69 +1,62 @@
-# Projeto de Analise de Dados - Modulo 1 / Semana 7
-# Aluno: [Rutineia Cordeiro de Avila]
-# Turma: Analise_de_Dados_T1
+# projeto de analise de dados - modulo 1 / semana 7
+# aluna: Rutineia Avila
+# turma: Analise_de_Dados_T1
+
 import os
 import pandas as pd
 
-arquivo_alvo = 'varejo.csv'
-pasta_atual = os.path.dirname(os.path.abspath(__file__))
-caminho_csv = os.path.join(pasta_atual, arquivo_alvo)
+arquivo = 'varejo.csv'
+pasta_local = os.path.dirname(os.path.abspath(__file__))
+caminho_csv = os.path.join(pasta_local, arquivo)
 
-# Carrega a base com o separador correto pra nao quebrar as colunas
 df = pd.read_csv(caminho_csv, sep=';')
 
-# --- ETAPA 2 e 3: Limpeza dos dados ---
-
-# 1. Filtra IDs invalidos (tira zeros e nulos)
+# --- comeco da limpeza da base ---
 df['CO_ID'] = df['CO_ID'].astype(str).str.strip()
 df = df[(df['CO_ID'] != '') & (df['CO_ID'] != '0') & (df['CO_ID'] != 'nan')]
 
-# 2. Apaga as linhas repetidas
 df = df.drop_duplicates()
 
-# 3. Coloca texto nas categorias que vieram vazias
 df['PR_CAT'] = df['PR_CAT'].fillna('Sem Categoria')
 df.loc[df['PR_CAT'].str.strip() == '', 'PR_CAT'] = 'Sem Categoria'
 
-# 4. Se o numero de filhos ta vazio, vira 0
 df['CL_FHL'] = df['CL_FHL'].fillna(0).astype(int)
-
-# 5. Muda o texto da data para tipo data de verdade
 df['DATA'] = pd.to_datetime(df['DATA'], errors='coerce')
 
-
-print("--- ETAPA 4: Contas Estatisticas (Coluna Filhos) ---")
-
-# Fazendo as metricas obrigatorias de filhos de forma direta
-contagem = df['CL_FHL'].count()
-media = df['CL_FHL'].mean()
-mediana = df['CL_FHL'].median()
-moda = int(df['CL_FHL'].mode()[0])
-minimo = df['CL_FHL'].min()
-maximo = df['CL_FHL'].max()
-desvio_padrao = df['CL_FHL'].std()
+# --- calculos estatisticos de filhos ---
+print("--- METRICAS DA COLUNA FILHOS ---")
+linhas_limpas = df['CL_FHL'].count()
+media_f = df['CL_FHL'].mean()
+mediana_f = df['CL_FHL'].median()
+moda_f = int(df['CL_FHL'].mode())
+minimo_f = df['CL_FHL'].min()
+maximo_f = df['CL_FHL'].max()
+desvio_padrao_f = df['CL_FHL'].std()
 q1 = df['CL_FHL'].quantile(0.25)
 q3 = df['CL_FHL'].quantile(0.75)
 
-print(f"Quantidade total: {contagem}")
-print(f"Media de filhos: {media:.2f}")
-print(f"Mediana de filhos: {mediana}")
-print(f"Moda de filhos: {moda}")
-print(f"Minimo: {minimo} | Maximo: {maximo}")
-print(f"Desvio Padrao: {desvio_padrao:.2f}")
+print(f"Total de registros: {linhas_limpas}")
+print(f"Media de filhos: {media_f:.2f}")
+print(f"Mediana: {mediana_f}")
+print(f"Moda: {moda_f}")
+print(f"Minimo: {minimo_f} | Maximo: {maximo_f}")
+print(f"Desvio Padrao: {desvio_padrao_f:.2f}")
 print(f"Quartil 1 (25%): {q1}")
 print(f"Quartil 3 (75%): {q3}\n")
 
+# --- agrupamento dos resultados ---
+print("--- QUANTIDADE DE COMPRAS POR GENERO ---")
+tot_genero = df.groupby('CL_GENERO').size()
+for genero, tot_vendas in tot_genero.items():
+    print(f"Gênero {genero}: {tot_vendas} compras")
+print("\n")
 
-print("--- ETAPA 5: Agrupamentos e Resultados Finais ---")
+print("--- VENDAS POR CATEGORIA (ORDENADO) ---")
+tot_categoria = df.groupby('PR_CAT').size().sort_values(ascending=False)
+for categoria, tot_vendas in tot_categoria.items():
+    print(f"{categoria}: {tot_vendas} itens")
 
-# Agrupamento 1: Vendas por Genero usando o groupby do pandas
-agrupado_genero = df.groupby('CL_GENERO').size()
-print("Distribuição por Gênero:")
-for genero, qtd in agrupado_genero.items():
-    print(f" - {genero}: {qtd} compras")
-
-# Agrupamento 2: Vendas por Categoria ordenado do maior pro menor
-agrupado_cat = df.groupby('PR_CAT').size().sort_values(ascending=False)
-print("\nDistribuição por Categoria (Ordenado por Volume):")
-for categoria, qtd in agrupado_cat.items():
-    print(f" - {categoria}: {qtd} itens")
+# --- exportando o df_limpo exigido na sprint 6 ---
+caminho_saida = os.path.join(pasta_local, 'varejo_limpo.csv')
+df.to_csv(caminho_saida, sep=';', index=False)
+print("\nArquivo criado com sucesso: varejo_limpo.csv")
